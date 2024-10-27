@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
+    <style>
+        body {
+            overflow: hidden; /* ป้องกันการเลื่อนหน้าจอ */
+        }
+        .circle {
+            width: 50px;
+            height: 50px;
+            background-color: black; /* สีเริ่มต้นเป็นสีดำ */
+            border-radius: 50%;
+            position: absolute;
+            display: none; /* เริ่มต้นซ่อนวงกลม */
+            transition: opacity 0.2s ease, background-color 0.2s ease; /* เอฟเฟกต์การทำให้มองเห็นและเปลี่ยนสี */
+        }
+        .interval-display {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ช่องแสดงค่า intervalTime -->
+    <div class="interval-display">Interval: 2000 ms</div>
+
+    <!-- วงกลมที่ผู้ใช้จะต้องคลิก -->
+    <div class="circle"></div>
+
+    <script>
+        const circle = document.querySelector('.circle');
+        const intervalDisplay = document.querySelector('.interval-display');
+        let intervalTime = 2000; // ความเร็วเริ่มต้นที่ 2000 ms
+        let intervalId;
+        let increment = 50; // ค่าเริ่มต้นสำหรับเพิ่ม
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        function moveCircle() {
+            const x = Math.floor(Math.random() * (screenWidth - 50)); // -50 เพื่อไม่ให้วงกลมล้นจอ
+            const y = Math.floor(Math.random() * (screenHeight - 50));
+
+            circle.style.left = `${x}px`;
+            circle.style.top = `${y}px`;
+            circle.style.display = 'block'; // แสดงวงกลมใหม่
+            circle.style.opacity = 1; // ทำให้วงกลมมองเห็น
+        }
+
+        // ฟังก์ชันปรับเวลาและเรียกซ้ำ
+        function adjustInterval() {
+                    if (intervalTime <= 700) {
+                        increment = 10; // ถ้า intervalTime <= 700 เพิ่ม 10
+                    } else if (intervalTime <= 1000) {
+                        increment = 20; // ถ้า intervalTime <= 1000 เพิ่ม 20
+                    }
+            clearInterval(intervalId); // หยุด interval ปัจจุบัน
+            intervalId = setInterval(moveCircle, intervalTime); // เริ่ม interval ใหม่ด้วยเวลาที่ปรับ
+            intervalDisplay.textContent = `Interval: ${intervalTime} ms`; // อัปเดตค่า intervalTime บน HTML
+        }
+
+        // กดถูก เปลี่ยนสีเป็นเขียวและทำให้วงกลมหายไป
+        circle.addEventListener('click', (event) => {
+            event.stopPropagation(); // ป้องกันการส่งเหตุการณ์ไปยัง window
+            
+            circle.style.backgroundColor = 'green'; // เปลี่ยนสีเป็นเขียว
+            intervalTime = Math.max(50, intervalTime - increment); // ลดความเร็วลง 50ms
+            adjustInterval();
+
+            setTimeout(() => {
+                circle.style.opacity = 0; // ทำให้วงกลมหายไป (opacity = 0)
+                setTimeout(() => {
+                    circle.style.display = 'none'; // ซ่อนวงกลมหลังจากหายไป
+                    circle.style.backgroundColor = 'black'; // คืนค่าสีเป็นสีดำ
+                }, 200); // เวลาที่ตรงกับ transition
+            }, 50); // ระยะเวลาที่ตรงกับ transition ใน CSS
+        });
+
+        // กดไม่ถูก เปลี่ยนสีเป็นแดงและทำให้วงกลมหายไป
+        window.addEventListener('click', (event) => {
+            if (event.target !== circle) {
+                circle.style.backgroundColor = 'red'; // เปลี่ยนสีเป็นแดง
+                circle.style.opacity = 0; // ทำให้วงกลมหายไป (opacity = 0)
+                setTimeout(() => {
+                    circle.style.display = 'none'; // ซ่อนวงกลมหลังจากหายไป
+                    circle.style.backgroundColor = 'black'; // คืนค่าสีเป็นสีดำ
+                }, 200); // เวลาที่ตรงกับ transition
+
+                    intervalTime += increment; 
+                
+                adjustInterval();
+            }
+        });
+
+        // เริ่มเกม
+        intervalId = setInterval(moveCircle, intervalTime);
+
+    </script>
+
+</body>
+</html>
